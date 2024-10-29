@@ -2,6 +2,13 @@
 
   <h1>Morpion</h1>
 
+  <p class="player" v-if="playerMark === 'X' ">
+    C'est au joueur avec le signe <span>X</span>  qui doit jouer !
+  </p>
+  <p class="player" v-else>
+    C'est au joueur avec le signe <span>O</span> qui doit jouer !
+  </p>
+
   <!-- <section class="container">
     <div @click="addMark" data-index="0" class="case"></div>
     <div @click="addMark" data-index="1" class="case"></div>
@@ -16,25 +23,22 @@
 
   <section class="container">
     <div v-for="(c, i) in cases" :key="i">
-      <div @click="addMark" @keydown="restart" :data-index="i" class="case">{{ c }}</div>
+      <div @click="addMark(i)" @keydown="addMark(i)" :data-index="i" class="case">{{ c }}</div>
     </div>
   </section>
 
-  <!-- <div v-if="isGame === false">
-    <p @click="restart">Cliquer pour rejouer</p>
-  </div> -->
-  <div>
-    <p @click="restart" @keydown="restart">Cliquer pour rejouer</p>
+  <div v-if="isGame === false">
+    <p class="restart" @click="restart" @keydown="restart">Cliquer pour rejouer</p>
   </div>
 
   <div class="dashboard">
     <div>
-      <p>Player 1 (X): {{ playerOne }}</p>
-      <p>score: </p>
+      <p>Player 1 (X)</p>
+      <p>score: {{ playerOne }}</p>
     </div>
     <div>
-      <p>Player 2 (O): {{ playerTwo }}</p>
-      <p>score: </p>
+      <p>Player 2 (O)</p>
+      <p>score: {{ playerTwo }}</p>
     </div>
   </div>
 
@@ -48,7 +52,8 @@ const playerOne = ref<number>(0);
 const playerTwo = ref<number>(0);
 const answers: string[] = ['', '', '', '', '', '', '', '', ''];
 let isGame = true;
-let playerMark = 'X';
+const playerMark = ref('X');
+let points = true;
 
 const correctAnswers: number[][] = [
   [0, 1, 2],
@@ -61,43 +66,40 @@ const correctAnswers: number[][] = [
   [2, 4, 6],
 ];
 
-const addMark = (e: any) => {
+const addMark = (index: number) => {
   if (!isGame) {
     /* eslint-disable-next-line */
     return}
   /* eslint-disable-next-line */
   else {
-    /* eslint-disable-next-line */
-    const index: number = e.target.dataset.index;
-
-    if (playerMark === 'X') {
-      if (!e.target.textContent) {
-        e.target.textContent = 'X';
-        e.target.style.fontSize = '3em';
+    if (playerMark.value === 'X') {
+      if (cases.value[index] === '') {
+        cases.value.splice(index, 1, 'X');
         answers.splice(index, 1, 'X');
-        playerMark = 'O';
+        playerMark.value = 'O';
       }
     }
 
-    if (playerMark === 'O') {
-      if (!e.target.textContent) {
-        e.target.textContent = 'O';
-        e.target.style.fontSize = '3em';
+    if (playerMark.value === 'O') {
+      if (cases.value[index] === '') {
+        cases.value.splice(index, 1, 'O');
         answers.splice(index, 1, 'O');
-        playerMark = 'X';
+        playerMark.value = 'X';
       }
     }
 
     correctAnswers.forEach((ca) => {
       const [a, b, c]: number[] = ca;
 
-      if (answers[a] && answers[a] === answers[b] && answers[b] === answers[c]) {
+      if (answers[a] && answers[a] === answers[b] && answers[b] === answers[c] && points === true) {
         isGame = false;
-        if (answers[a] === 'X') {
+        if (answers[a] === 'X' && points === true) {
           playerOne.value++;
+          points = false;
         }
-        if (answers[a] === 'O') {
+        if (answers[a] === 'O' && points === true) {
           playerTwo.value++;
+          points = false;
         }
         alert(`Le joueur avec la marque ${answers[a]} a gagné`);
       }
@@ -106,12 +108,11 @@ const addMark = (e: any) => {
 };
 
 const restart = () => {
-  console.log(cases.value);
   for (let i = 0; i < answers.length; i++) {
     answers.splice(i, 1, '');
     cases.value[i] = '';
   }
-  console.log(cases.value);
+  points = true;
   isGame = true;
 };
 
@@ -121,6 +122,14 @@ const restart = () => {
 h1 {
   text-align: center;
   color: lightcoral;
+}
+.player{
+  text-align: center;
+  font-size: 1.2em;
+  span{
+    font-size: 1.4em;
+    color: blue;
+  }
 }
 
 .container {
@@ -148,5 +157,10 @@ h1 {
   display: flex;
   justify-content: space-around;
   font-size: 1.5em;
+}
+.restart{
+  text-align: center;
+  background-color: aquamarine;
+  font-size: 1.2em;
 }
 </style>
